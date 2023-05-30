@@ -31,7 +31,6 @@ def Similarity( hands, oldhand ):
             o = np.array( hands[t]['lmList'] )
             o2 = np.array( oldhand['lmList'] )
             co = cosine_similarity( o.reshape(1,-1), o2.reshape(1,-1) )
-            print( co )
             if ( (co[0][0] >= 0.9) and (hands[t]['type'] == oldhand['type']) ):
                 return t
             t = t - 1
@@ -48,13 +47,8 @@ def Track( hands, img, id1, id2, coor1, coor2, hand1, hand2, mot_tracker ):
             dets = np.append(dets, aBbox,axis= 0)
 
         dets[:,2:4] += dets[:,0:2] #convert to [x1,y1,w,h] to [x1,y1,x2,y2]
-        print(dets)
 
-        start_time = time.time()
         trackers, handList = mot_tracker.update(hands, dets)#利用检测的结果更新跟踪器,返回一个5个数的数组
-        cycle_time = time.time() - start_time
-        #total_time += cycle_time
-        print(len(trackers))
 
         findco1 = False
         findco2 = False
@@ -63,10 +57,7 @@ def Track( hands, img, id1, id2, coor1, coor2, hand1, hand2, mot_tracker ):
         index = 0
 
         for d in trackers:
-            print('%d,%.2f,%.2f,%.2f,%.2f,1,-1,-1,-1'%(d[4],d[0],d[1],d[2]-d[0],d[3]-d[1]))
             d = d.astype(np.int32)#转换成整形
-            cv2.rectangle( img, (d[0],d[1]), (d[2],d[3]), colours[d[4]%len(trackers),:], 2 )
-            cv2.putText(img, str(d[4]), (d[0],d[1]), cv2.FONT_HERSHEY_PLAIN, 3, colours[d[4]%len(trackers),:], 3)
 
             if int(d[4]) == id1:
                 findco1 = True
@@ -165,19 +156,12 @@ def Track( hands, img, id1, id2, coor1, coor2, hand1, hand2, mot_tracker ):
             else:
                 id2 = -1
 
-        print( "=====================" )
-        print( id1 )
-        print( id2 )
-
         return id1, id2, coor1, coor2, hand1, hand2
 
     elif len(hands) == 1:
         x, y, w, h = hands[0]['bbox']
         dets = [[x, y, x+w, y+h]]
-        print(dets)
-        #dets[2:4] += dets[0:2] #convert to [x1,y1,w,h] to [x1,y1,x2,y2]
         trackers, handList = mot_tracker.oneHand(hands, dets)
-        print(len(trackers))
 
         findco1 = False
         findco2 = False
@@ -185,10 +169,7 @@ def Track( hands, img, id1, id2, coor1, coor2, hand1, hand2, mot_tracker ):
         missHand = []
         index = 0
         for d in trackers:
-            print('%d,%.2f,%.2f,%.2f,%.2f,1,-1,-1,-1'%(d[4],d[0],d[1],d[2]-d[0],d[3]-d[1]))
             d = d.astype(np.int32)#转换成整形
-            cv2.rectangle( img, (d[0],d[1]), (d[2],d[3]), colours[d[4]%len(trackers),:], 2 )
-            cv2.putText(img, str(d[4]), (d[0],d[1]), cv2.FONT_HERSHEY_PLAIN, 3, colours[d[4]%len(trackers),:], 3)
             if int(d[4]) == id1:
                 findco1 = True
                 coor1 = d
@@ -285,11 +266,7 @@ def Track( hands, img, id1, id2, coor1, coor2, hand1, hand2, mot_tracker ):
             else:
                 id2 = -1
 
-        print( "=====================" )
-        print( id1 )
-        print( id2 )
-
         return id1, id2, coor1, coor2, hand1, hand2
 
     else:
-        return id1, id2, coor1, coor2, hand1, hand2
+        return -1, -1, coor1, coor2, hand1, hand2

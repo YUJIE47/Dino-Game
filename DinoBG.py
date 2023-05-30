@@ -48,7 +48,7 @@ class BackGround():
 class Bird():
     def __init__(self):
         self.xPos = cfg.SCREEN_WIDTH
-        self.yPos = 250
+        self.yPos = 150
         self.fly_img = []
 
         for value in cfg.IMAGES['BIRD']:
@@ -60,13 +60,14 @@ class Bird():
 
     def Update( self, speed, XPos):
         if XPos < 780: # 未到達錨點
-            self.xPos -= ( self.flyingSpeed + speed / 4 )
+            self.xPos += ( self.flyingSpeed + speed / 10 )
         else:
-            self.xPos -= ( self.flyingSpeed + speed / 2 )
+            self.xPos += ( self.flyingSpeed + speed / 5 )
 
-        if ( self.xPos <= -self.display_img.get_width() ):
-            self.xPos = cfg.SCREEN_WIDTH + random.randint(100, 2000)
-            self.yPos = random.randint( 250, 270 )
+        if ( self.xPos >= 11*self.display_img.get_width() ):
+            print(self.display_img.get_width())
+            self.xPos = -(cfg.SCREEN_WIDTH + random.randint(100, 2000))
+            self.yPos = random.randint( 150, 170 )
         
         self.Fly()
         if ( self.fly_index >= 10 ):
@@ -109,8 +110,9 @@ class LargeCactus():
 class SmallCactus():
     def __init__(self):
         
-        self.xPos = random.randint(100, cfg.SCREEN_WIDTH)
+        self.xPos = random.randint(500, cfg.SCREEN_WIDTH)
         self.yPos = cfg.GROUND_HEIGHT1
+        self.change = True
 
         self.cactus_img = []
         for value in cfg.IMAGES['SMALL_CACTUS']:
@@ -120,6 +122,7 @@ class SmallCactus():
         self.display_img = self.cactus_img[self.cactusNumber]
         
     def Update(self, speed, XPos):
+
         if XPos < 780:
             self.xPos -= speed / 4.5
         else:
@@ -129,6 +132,11 @@ class SmallCactus():
             self.xPos = cfg.SCREEN_WIDTH + random.randint(100, 1000)
             self.cactusNumber = random.randint(0, 2)
             self.display_img = self.cactus_img[self.cactusNumber]
+            self.change = True
+        else:
+            self.change = False
+
+        return self.xPos, self.display_img.get_width(), self.change
 
     def Draw(self):
         SCREEN.blit(self.display_img, (self.xPos, self.yPos))
@@ -145,8 +153,9 @@ class DinoGameBG():
         self.bird = Bird()
         self.smallCactus1 = SmallCactus()
         self.largeCactus1 = LargeCactus()
+        self.gameover = False
 
-    def UpDate(self, P1XPos, P2XPos):
+    def UpDate(self, P1XPos, P2XPos, P1isAlive, P2isAlive):
         if P1XPos >= P2XPos:
             XPos = P1XPos
         else:
@@ -159,11 +168,23 @@ class DinoGameBG():
         self.bird.Draw()
         self.bird.Update( self.GAMESPEED, XPos)
         self.smallCactus1.Draw()
-        self.smallCactus1.Update(self.GAMESPEED, XPos)
-        self.largeCactus1.Draw()
-        self.largeCactus1.Update(self.GAMESPEED, XPos)
+        sc_xPos, sc_width, is_change = self.smallCactus1.Update(self.GAMESPEED, XPos)
+        # print("smallCactus1 xPos:", sc_xPos, "smallCactus1 yPos:", sc_yPos)
+        
+        # self.largeCactus1.Draw()
+        # self.largeCactus1.Update(self.GAMESPEED, XPos)
 
-        pygame.display.update()
+        if self.gameover == False:
+            if P1isAlive == False or P2isAlive == False:
+                if P1isAlive == False:
+                    win = pygame.image.load(cfg.IMAGES['P2WIN'])
+                else:
+                    win = pygame.image.load(cfg.IMAGES['P1WIN'])
+                SCREEN.blit( win, [0,0] )
+                self.gameover = True
+            pygame.display.update()
+
+        return sc_xPos, sc_width, is_change
 
     def SetSpeed(self, speed, fps):
         if fps >=20:
@@ -172,6 +193,8 @@ class DinoGameBG():
             self.GAMESPEED = speed*(20 - fps)*0.7 + self.pre_fps*0.3
 
         self.pre_fps = fps
+
+        return self.GAMESPEED
 
     def IsExist(self):
         for event in pygame.event.get():

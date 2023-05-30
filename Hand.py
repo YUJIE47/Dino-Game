@@ -70,9 +70,11 @@ while True:
     #（4）獲取手部關鍵點信息
     # 檢測手部信息，返回手部關鍵點信息hands字典，繪製關鍵點和連線後的圖像img
     hands, img = detector.findHands(img)
+    
     #print(hands)    
 
     if len(hands) > 1:
+         
         x, y, w, h = hands[0]['bbox']
         dets = [[x, y, w, h]]
 
@@ -331,7 +333,7 @@ while True:
     
     # 把fps值顯示在圖像上,img畫板,顯示字符串,顯示的座標位置,字體,字體大小,顏色,線條粗細
     cv2.putText(img, str(int(fps)), (50,70), cv2.FONT_HERSHEY_PLAIN, 3, (255,0,0), 3)
- 
+
     # 顯示圖像，輸入窗口名及圖像數據
     # cv2.namedWindow("img", 0)  # 窗口大小可手動調整
     cv2.imshow('img', img)

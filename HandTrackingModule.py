@@ -53,7 +53,7 @@ class HandDetector():
                         aHandLandMarkPosition.append([id, xPos, yPos])
                         if draw:
                             if ( id == self.mpHands.HandLandmark.INDEX_FINGER_TIP and id == self.mpHands.HandLandmark.MIDDLE_FINGER_TIP ):
-                                cv2.circle( img, (xPos, yPos), 15, (255, 255, 255), cv2.FILLED )
+                                cv2.circle( img, (xPos, yPos), 15, (255, 0, 0), cv2.FILLED )
             
                     handLandMarkPositions.append(copy.deepcopy(aHandLandMarkPosition))                   
 
